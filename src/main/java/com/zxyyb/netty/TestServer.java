@@ -8,6 +8,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -55,8 +57,32 @@ public class TestServer {
 					System.out.println("IP:" + arg0.localAddress().getHostName());
 					System.out.println("Port:" + arg0.localAddress().getPort());
 					System.out.println("报告完毕");
+					
+					/*
+					 * LineBasedFrameDecoder 遍历ByteBuf 中的可读字节，判断是否有 \n 或者 \r\n ，如果有就以此位置为结束位置。
+					 * 
+					 * LineBasedFrameDecoder + StringDecoder 组合就是按行切换的文本解码器，它被设计用来支持TCP 的粘包 和 拆包。
+					 */
+					
+					/*
+					 * TCP 以流的方式进行数据传输，上层的应用协议为了对消息进行区分，往往采用如下四种形式：
+					 * 
+					 * 1. 消息长度固定累计读取到长度为len 的报文后就认为读取到了一个完整的消息，重新读取。
+					 * 2. 将回车换行符作为消息结束符（如FTP ,这种协议比较广泛）。
+					 * 3. 将特殊分隔符作为消息结束标志。
+					 * 4. 通过在消息头中定义长度字段表示消息的总长度。
+					 * 
+					 * DeimiterBaseFrameDecoder 可以自动完成以分隔符作为结束标志的消息的解码。
+					 * 
+					 * FixedLengthFrameDecoder 可以自动完成对定长消息的解码。
+					 * 
+					 */
+					arg0.pipeline().addLast(new LineBasedFrameDecoder(1024));
+					
+					arg0.pipeline().addLast(new StringDecoder());
 
 					arg0.pipeline().addLast(new TestServerHandle());
+					
 				}
 
 			});
