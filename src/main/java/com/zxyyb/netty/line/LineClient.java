@@ -1,4 +1,4 @@
-package com.zxyyb.netty;
+package com.zxyyb.netty.line;
 
 import java.net.InetAddress;
 
@@ -13,7 +13,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 
-public class TestClient {
+public class LineClient {
 
 	private static final int port = 8090;
 
@@ -21,7 +21,7 @@ public class TestClient {
 
 	public static void main(String[] args) {
 
-		new TestClient().connect();
+		new LineClient().connect();
 
 	}
 
@@ -43,7 +43,11 @@ public class TestClient {
 
 					System.out.println("准备");
 					
-					arg0.pipeline().addLast(new TestClientHandle());
+					arg0.pipeline().addLast(new LineBasedFrameDecoder(1024));
+					
+					arg0.pipeline().addLast(new StringDecoder());
+
+					arg0.pipeline().addLast(new LineClientHandle());
 				}
 			});
 

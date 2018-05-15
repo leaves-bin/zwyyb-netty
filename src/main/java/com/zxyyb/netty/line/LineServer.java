@@ -1,4 +1,4 @@
-package com.zxyyb.netty;
+package com.zxyyb.netty.line;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -16,12 +16,12 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
-public class TestServer {
+public class LineServer {
 
 	private static final int port = 8090;
 
 	public static void main(String[] args) {
-		new TestServer().bind();
+		new LineServer().bind();
 	}
 
 	public void bind() {
@@ -62,14 +62,14 @@ public class TestServer {
 					System.out.println("报告完毕");
 					
 					/*
-					 * TCP 以流的方式进行数据传输，上层的应用协议为了对消息进行区分，往往采用如下四种形式：
+					 * LineBasedFrameDecoder 遍历ByteBuf 中的可读字节，判断是否有 \n 或者 \r\n ，如果有就以此位置为结束位置。
 					 * 
-					 * 1. 消息长度固定累计读取到长度为len 的报文后就认为读取到了一个完整的消息，重新读取。
-					 * 2. 将回车换行符作为消息结束符（如FTP ,这种协议比较广泛）。
-					 * 3. 将特殊分隔符作为消息结束标志。
-					 * 4. 通过在消息头中定义长度字段表示消息的总长度。
+					 * LineBasedFrameDecoder + StringDecoder 组合就是按行切换的文本解码器，它被设计用来支持TCP 的粘包 和 拆包。
 					 */
-					arg0.pipeline().addLast(new TestServerHandle());
+					arg0.pipeline().addLast(new LineBasedFrameDecoder(1024));
+					arg0.pipeline().addLast(new StringDecoder());
+					
+					arg0.pipeline().addLast(new LineServerHandle());
 					
 				}
 

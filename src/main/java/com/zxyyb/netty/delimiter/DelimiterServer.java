@@ -1,4 +1,4 @@
-package com.zxyyb.netty;
+package com.zxyyb.netty.delimiter;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -16,12 +16,12 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
-public class TestServer {
+public class DelimiterServer {
 
 	private static final int port = 8090;
 
 	public static void main(String[] args) {
-		new TestServer().bind();
+		new DelimiterServer().bind();
 	}
 
 	public void bind() {
@@ -62,14 +62,16 @@ public class TestServer {
 					System.out.println("报告完毕");
 					
 					/*
-					 * TCP 以流的方式进行数据传输，上层的应用协议为了对消息进行区分，往往采用如下四种形式：
-					 * 
-					 * 1. 消息长度固定累计读取到长度为len 的报文后就认为读取到了一个完整的消息，重新读取。
-					 * 2. 将回车换行符作为消息结束符（如FTP ,这种协议比较广泛）。
-					 * 3. 将特殊分隔符作为消息结束标志。
-					 * 4. 通过在消息头中定义长度字段表示消息的总长度。
+					 * DeimiterBaseFrameDecoder 可以自动完成以分隔符作为结束标志的消息的解码。
+					 * 两个参数：第一个是单挑消息的最大长度，到达长度后没有找到分隔符，或抛出异常（TooLangFrameException）;
+					 * 第二个是分隔符
 					 */
-					arg0.pipeline().addLast(new TestServerHandle());
+					ByteBuf delimiter = Unpooled.copiedBuffer("$".getBytes());
+					arg0.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, delimiter));
+					
+					arg0.pipeline().addLast(new StringDecoder());
+
+					arg0.pipeline().addLast(new DelimiterServerHandle());
 					
 				}
 
