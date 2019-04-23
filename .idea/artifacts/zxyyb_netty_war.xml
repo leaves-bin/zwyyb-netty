@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="zxyyb-netty:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>zxyyb-netty</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="zxyyb-netty.war">
+      <element id="artifact" artifact-name="zxyyb-netty:war exploded" />
+    </root>
+  </artifact>
+</component>
